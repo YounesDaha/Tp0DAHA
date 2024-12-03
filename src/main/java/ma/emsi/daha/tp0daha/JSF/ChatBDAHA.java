@@ -60,6 +60,7 @@ public class ChatBDAHA implements Serializable {
         return systemRole;
     }
 
+
     public void setSystemRole(String systemRole) {
         this.systemRole = systemRole;
     }
@@ -107,27 +108,34 @@ public class ChatBDAHA implements Serializable {
      */
     public String envoyer() {
         if (question == null || question.isBlank()) {
-            // Erreur ! Le formulaire va être automatiquement réaffiché par JSF en réponse à la requête POST,
-            // avec le message d'erreur donné ci-dessous.
             FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR,
                     "Texte question vide", "Il manque le texte de la question");
             facesContext.addMessage(null, message);
             return null;
         }
-        // Entourer la réponse avec "||".
-        this.reponse = "||";
-        // Si la conversation n'a pas encore commencé, ajouter le rôle système au début de la réponse
+
+        // Inversion des mots dans la question.
+        StringBuilder responseBuilder = new StringBuilder("||");
         if (this.conversation.isEmpty()) {
-            // Ajouter le rôle système au début de la réponse
-            this.reponse += systemRole.toUpperCase(Locale.FRENCH) + "\n";
-            // Invalide le bouton pour changer le rôle système
+            // Ajouter le rôle système au début de la réponse.
+            responseBuilder.append(systemRole.toUpperCase(Locale.FRENCH)).append("\n");
             this.systemRoleChangeable = false;
         }
-        this.reponse += question.toLowerCase(Locale.FRENCH) + "||";
-        // La conversation contient l'historique des questions-réponses depuis le début.
+
+        // Inverser chaque mot de la question.
+        String[] words = question.split("\\s+");
+        for (String word : words) {
+            responseBuilder.append(new StringBuilder(word).reverse()).append(" ");
+        }
+
+        this.reponse = responseBuilder.toString().trim() + "||";
+
+        // Ajouter la réponse à la conversation.
         afficherConversation();
         return null;
     }
+
+
 
     /**
      * Pour un nouveau chat.
